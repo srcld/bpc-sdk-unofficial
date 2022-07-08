@@ -1,0 +1,26 @@
+{
+  "name": "@srcld/bpc-sdk-unofficial",
+  "version": "0.0.1",
+  "description": "NodeJS only toolkit to build Virtimo BPC Modules fast",
+  "main": "sdk.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srcld/bpc-sdk-unofficial.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/srcld/bpc-sdk-unofficial/issues"
+  },
+  "homepage": "https://github.com/srcld/bpc-sdk-unofficial#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "dependencies": {
+    "@muzkat/nextjs-tools": "^0.1.4",
+    "@srcld/war": "^0.0.4"
+  }
+}
