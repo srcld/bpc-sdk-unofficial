@@ -1,0 +1,3 @@
+# resources folder
+
+# todo fix build without this folder...
