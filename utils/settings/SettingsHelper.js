@@ -1,5 +1,6 @@
 const baseSettings = require('./baseSettings'),
     fs = require('fs');
+const war = require("@srcld/war");
 
 const createSettingsFromPartsObject = function (settingParts = {}) {
     const final = {};
@@ -23,10 +24,16 @@ const createSettingsFromPartsObject = function (settingParts = {}) {
     return final;
 }
 
-const createSettingsFile = function (obj = {}, type = '') {
+const createSettingsFile = function (obj = {}, type = '', path = '') {
     const settingsJson = createSettingsFromPartsObject(obj);
     const settingsText = JSON.stringify(settingsJson, undefined, 4);
-    fs.writeFileSync('default_' + type + '_settings.json', settingsText, 'utf-8')
+    fs.writeFileSync((path.length ? path : '') + 'default_' + type + '_settings.json', settingsText, 'utf-8')
 }
 
-module.exports = {createSettingsFile}
+const handleSettings = function (settings, basePath = '') {
+    Object.keys(settings).map((settingsType) => {
+        createSettingsFile(settings[settingsType], settingsType, basePath)
+    })
+}
+
+module.exports = {createSettingsFile, handleSettings}

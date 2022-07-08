@@ -1,7 +1,7 @@
 const nExtJs = require('@muzkat/nextjs-tools'),
     war = require('@srcld/war'),
-    {getBuildFile} = require('./build/buildFile'),
-    {createSettingsFile} = require('./settings/SettingsHelper'),
+    {getBuildFile} = require('./utils/buildFile'),
+    {createSettingsFile, handleSettings} = require('./utils/settings/SettingsHelper'),
     {getManifest, getWarBuildConfigObject} = require('./utils');
 
 /**
@@ -33,13 +33,20 @@ const buildWar = (moduleName = '', sources = [], applicationName = '') => {
  * @param moduleName
  * @param sources
  * @param applicationName
+ * @param settings
  * @returns {Promise<*>}
  */
-const buildPackage = (moduleName = '', sources = [], applicationName = '') => {
+const buildPackage = (moduleName = '', sources = [], applicationName = '', settings = {}) => {
     const builder = getBPCBuilder(moduleName);
     return builder
         .build()
-        .then((success) => {
+        .then((buildObject) => {
+            const buildDir = 'build'; // check why it's not an object...
+            let resourcesBasePath = './' + buildDir + '/' + moduleName + '/resources';
+            war.createFolderIfNotPresent(resourcesBasePath);
+            resourcesBasePath += '/defaults';
+            war.createFolderIfNotPresent(resourcesBasePath);
+            handleSettings(settings, resourcesBasePath + '/');
             return buildWar(moduleName, sources, applicationName)
         })
 }
