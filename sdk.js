@@ -31,12 +31,11 @@ const buildWar = (moduleName = '', sources = [], applicationName = '') => {
  * One stop build check out. Hello.
  *
  * @param moduleName
- * @param sources
  * @param applicationName
  * @param settings
  * @returns {Promise<*>}
  */
-const buildPackage = (moduleName = '', sources = [], applicationName = '', settings = {}) => {
+const buildPackage = (moduleName = '', applicationName = '', settings = {}) => {
     const builder = getBPCBuilder(moduleName);
     return builder
         .build()
@@ -47,6 +46,12 @@ const buildPackage = (moduleName = '', sources = [], applicationName = '', setti
             resourcesBasePath += '/defaults';
             war.createFolderIfNotPresent(resourcesBasePath);
             handleSettings(settings, resourcesBasePath + '/');
+
+            const sources = [{
+                source: [buildDir, moduleName].join('/'),
+                target: false
+            }];
+
             return buildWar(moduleName, sources, applicationName)
         })
 }
