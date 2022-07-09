@@ -16,7 +16,7 @@ const compatPathBuilder = (moduleName) => 'bpc-fe-' + moduleName;
  * @param version
  * @param buildInfo
  */
-const getManifest = (applicationDisplayName = '', moduleName = '', version = '0.0.1', buildInfo = '4711') => {
+const getManifest = (applicationDisplayName = '', moduleName = '', version = '0.0.1', buildInfo = 'NOT DEFINED') => {
     return [{
         key: 'Manifest-Version', value: '1.0'
     }, {

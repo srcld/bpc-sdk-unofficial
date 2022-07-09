@@ -5,14 +5,13 @@ const nExtJs = require('@muzkat/nextjs-tools'),
     {getManifest, getWarBuildConfigObject} = require('./utils');
 
 /**
- * get nextjs-tools builder for your module (Ext Js Package)
+ * get nExtJs-tools builder for your module (Ext Js Package)
  *
  * @param moduleName
- * @returns {{getAppConfig: function(*): *, buildFile: *, generateBundles: function(*): Promise<*>, build: function(): Promise<boolean>, getPackageDirectories: function(*, *, *=): {packagePath: string, packageRoot: string, packagesPath: string, packageName: string}[], createPackage: function(*=, *=, *=): *, fetchFiles: function(*): *, generatePathsForPackages: function(*): *, createWarPackage: function(*=, *=, *=): *, deploy: function(): Promise<void>}}
+ * @returns {{getAppConfig: function(*, *): *, buildFile: *, build: function(*=): Promise<{buildConfig: *, success: boolean, buildDir: string}>, createPackage: function(*=, *=, *=): *, clean: function(*=): void, createWarPackage: function(*=, *=, *=): *, deploy: function(): Promise<void>}}
  */
 const getBPCBuilder = (moduleName) => {
-    const buildFile = getBuildFile(moduleName)
-    return nExtJs(buildFile);
+    return nExtJs(getBuildFile(moduleName));
 }
 
 /**
@@ -21,10 +20,12 @@ const getBPCBuilder = (moduleName) => {
  * @param moduleName
  * @param sources
  * @param applicationName
+ * @param version
+ * @param buildInfo
  * @returns {Promise<*>}
  */
-const buildWar = (moduleName = '', sources = [], applicationName = '') => {
-    return war.buildByConfig(getWarBuildConfigObject(moduleName, undefined, sources, getManifest(applicationName, moduleName)));
+const buildWar = (moduleName = '', sources = [], applicationName = '', version, buildInfo) => {
+    return war.buildByConfig(getWarBuildConfigObject(moduleName, undefined, sources, getManifest(applicationName, moduleName, version, buildInfo)));
 }
 
 /**
@@ -33,11 +34,12 @@ const buildWar = (moduleName = '', sources = [], applicationName = '') => {
  * @param moduleName
  * @param applicationName
  * @param settings
+ * @param version
+ * @param buildInfo
  * @returns {Promise<*>}
  */
-const buildPackage = (moduleName = '', applicationName = '', settings = {}) => {
-    const builder = getBPCBuilder(moduleName);
-    return builder
+const buildPackage = (moduleName = '', applicationName = '', settings = {}, version, buildInfo) => {
+    return getBPCBuilder(moduleName)
         .build()
         .then((buildObject) => {
             const buildDir = 'build'; // check why it's not an object...
@@ -52,7 +54,7 @@ const buildPackage = (moduleName = '', applicationName = '', settings = {}) => {
                 target: false
             }];
 
-            return buildWar(moduleName, sources, applicationName)
+            return buildWar(moduleName, sources, applicationName, version, buildInfo)
         })
 }
 
