@@ -4,7 +4,7 @@
  * @returns {string}
  * @param moduleName
  */
-const compatPathBuilder = (moduleName) => 'bpc-fe' + moduleName;
+const compatPathBuilder = (moduleName) => 'bpc-fe-' + moduleName;
 
 /**
  * get BPC compliant manifest array, used in later build steps
