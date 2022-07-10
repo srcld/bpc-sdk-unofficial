@@ -1,10 +1,10 @@
 {
   "name": "@srcld/bpc-sdk-unofficial",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "NodeJS only toolkit to build Virtimo BPC Modules fast",
   "main": "sdk.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@muzkat/nextjs-tools": "^0.1.6",
-    "@srcld/war": "^0.0.5"
+    "@srcld/war": "^0.0.5",
+    "shelljs": "^0.8.5"
   }
 }

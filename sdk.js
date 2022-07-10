@@ -2,6 +2,7 @@ const nExtJs = require('@muzkat/nextjs-tools'),
     war = require('@srcld/war'),
     {getBuildFile} = require('./utils/buildFile'),
     {createSettingsFile, handleSettings} = require('./utils/settings/SettingsHelper'),
+    release = require('./utils/release/release'),
     {getManifest, getWarBuildConfigObject} = require('./utils');
 
 /**
@@ -65,5 +66,6 @@ module.exports = {
     getManifest,
     getWarBuildConfigObject,
     getBPCBuilder,
-    buildPackage
+    buildPackage,
+    release
 }

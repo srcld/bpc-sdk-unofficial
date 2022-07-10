@@ -1,6 +1,5 @@
 const baseSettings = require('./baseSettings'),
-    fs = require('fs');
-const war = require("@srcld/war");
+    fs = require('fs')
 
 const createSettingsFromPartsObject = function (settingParts = {}) {
     const final = {};
