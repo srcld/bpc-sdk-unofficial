@@ -132,8 +132,8 @@ const doRelease = function () {
     const {release, nextVersion} = updateVersionInGradleProperties();
     const commitText = (release ? releaseCommitPrefix : devCommitPrefix) + prefixVersionDivider + nextVersion;
     const tagMessage = release ? (tagPrefix + nextVersion) : undefined;
-    if (release) createTag(tagMessage);
     commitAndPushAllChanges(commitText);
+    if (release) createTag(tagMessage);
 };
 
 
