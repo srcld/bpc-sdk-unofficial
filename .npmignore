@@ -3,3 +3,4 @@ src/
 build/
 build-tmp/
 test.js
+tests/

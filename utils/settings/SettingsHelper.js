@@ -23,10 +23,44 @@ const createSettingsFromPartsObject = function (settingParts = {}) {
     return final;
 }
 
+const writeFile = function (path, data, options = 'utf-8') {
+    return fs.writeFileSync(path, data, options)
+}
+
+const readFile = function (path, options = 'utf-8') {
+    return fs.readFileSync(path, options);
+}
+
 const createSettingsFile = function (obj = {}, type = '', path = '') {
     const settingsJson = createSettingsFromPartsObject(obj);
     const settingsText = JSON.stringify(settingsJson, undefined, 4);
-    fs.writeFileSync((path.length ? path : '') + 'default_' + type + '_settings.json', settingsText, 'utf-8')
+    writeFile((path.length ? path : '') + 'default_' + type + '_settings.json', settingsText);
+}
+
+const readSettingsFile = function (path) {
+    return JSON.parse(readFile(path));
+}
+
+const groupedToSortedJson = function (grouped = {}) {
+    const sorted = {};
+    const groups = Object.keys(grouped);
+    groups.map((name, i) => {
+        const settings = [];
+        const existingGroup = grouped[name];
+        Object.keys(existingGroup).map((settingName) => {
+            let newSetting = Object.assign({}, (existingGroup[settingName] || {}));
+            newSetting.name = settingName;
+            settings.push(newSetting);
+        })
+        sorted[name] = {settings, sortPriority: i + 1};
+    })
+    return sorted;
+}
+
+const migrateSettingFile = function (path, type = 'grouped') {
+    let json = readSettingsFile(path);
+    json = groupedToSortedJson(json);
+    writeFile(path, JSON.stringify(json, undefined, 4));
 }
 
 const handleSettings = function (settings, basePath = '') {
@@ -35,4 +69,4 @@ const handleSettings = function (settings, basePath = '') {
     })
 }
 
-module.exports = {createSettingsFile, handleSettings}
+module.exports = {createSettingsFile, handleSettings, readSettingsFile, groupedToSortedJson, migrateSettingFile}

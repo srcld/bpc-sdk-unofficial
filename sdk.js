@@ -1,7 +1,13 @@
 const nExtJs = require('@muzkat/nextjs-tools'),
     war = require('@srcld/war'),
     {getBuildFile} = require('./utils/buildFile'),
-    {createSettingsFile, handleSettings} = require('./utils/settings/SettingsHelper'),
+    {
+        createSettingsFile,
+        handleSettings,
+        readSettingsFile,
+        groupedToSortedJson,
+        migrateSettingFile
+    } = require('./utils/settings/SettingsHelper'),
     release = require('./utils/release/release'),
     {getManifest, getWarBuildConfigObject} = require('./utils');
 
@@ -67,5 +73,8 @@ module.exports = {
     getWarBuildConfigObject,
     getBPCBuilder,
     buildPackage,
-    release
+    release,
+    readSettingsFile,
+    groupedToSortedJson,
+    migrateSettingFile
 }
