@@ -1,5 +1,6 @@
 const {readFileSync, writeFileSync} = require('fs'),
-    shell = require('shelljs');
+    shell = require('shelljs'),
+    log = console.log;
 
 ////////////////// FILE HANDLING
 
@@ -18,13 +19,17 @@ const read = function (path) {
 }
 
 const propsToArray = function (data = '') {
-    return data.split('\n').map((i) => {
-        let parts = i.split('=');
-        return {
-            key: parts[0],
-            value: parts[1]
-        };
-    });
+    return data
+        .trim()
+        .split('\n')
+        .filter((i) => (i || '').trim().length > 0)
+        .map((i) => {
+            let parts = i.split('=');
+            return {
+                key: parts[0],
+                value: parts[1]
+            };
+        });
 }
 
 const arrayToProps = function (data = []) {
@@ -66,11 +71,14 @@ const write = (data) => {
  *
  * @returns {{release: boolean, nextVersion}}
  */
-const updateVersionInGradleProperties = function () {
-    const dataBefore = read(propertiesFile);
+const updateVersionInGradleProperties = function (file = propertiesFile) {
+    const dataBefore = read(file);
     const arrayData = propsToArray(dataBefore);
+    console.table(arrayData);
     const {release, data, nextVersion} = updateVersion(arrayData);
     const text = arrayToProps(data);
+    log('UPDATED GRADLE PROPERTIES: ');
+    log(text);
     write(text);
     return {release, nextVersion};
 }
