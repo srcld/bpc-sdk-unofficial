@@ -85,6 +85,7 @@ const buildLegacyBpcPackage = function (moduleName) {
 
 
 module.exports = {
+    buildLegacyBpcPackage,
     getBuildFile,
     createSettingsFile,
     getManifest,
