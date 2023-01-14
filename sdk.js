@@ -55,13 +55,31 @@ const buildPackage = (moduleName = '', applicationName = '', settings = {}, vers
             resourcesBasePath += '/defaults';
             war.createFolderIfNotPresent(resourcesBasePath);
             handleSettings(settings, resourcesBasePath + '/');
-
-            const sources = [{
+            return [{
                 source: [buildDir, moduleName].join('/'),
                 target: false
             }];
-
+        }).then((sources) => {
             return buildWar(moduleName, sources, applicationName, version, buildInfo)
+        })
+}
+
+const buildLegacyBpcPackage = function (moduleName) {
+    return getBPCBuilder(moduleName)
+        .build()
+        .then((buildObject) => {
+            const buildDir = 'build'; // check why it's not an object...
+            let resourcesBasePath = './' + buildDir + '/' + moduleName + '/resources';
+            war.createFolderIfNotPresent(resourcesBasePath);
+            resourcesBasePath += '/defaults';
+            war.createFolderIfNotPresent(resourcesBasePath);
+            // handleSettings(settings, resourcesBasePath + '/');
+            return [{
+                source: [buildDir, moduleName].join('/'),
+                target: false
+            }];
+        }).then((sources) => {
+            return buildWar(moduleName, sources, '', 'foo', 'bar')
         })
 }
 
