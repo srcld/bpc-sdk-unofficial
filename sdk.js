@@ -65,7 +65,15 @@ const buildPackage = (moduleName = '', applicationName = '', settings = {}, vers
 }
 
 const buildLegacyBpcPackage = function (moduleName) {
-    return getBPCBuilder(moduleName)
+    // overwrite internal config to fit to Sencha Cmd legacy standards
+    // todo read corresponding files from repo
+    const buildDescriptor = getBPCBuilder(moduleName);
+    if (buildDescriptor && buildDescriptor.buildFile) {
+        buildDescriptor.buildFile.srcDir = 'packages'
+        buildDescriptor.buildFile.packagesDir = 'local'
+    }
+    // todo handle settings, buildInfo, version
+    return buildDescriptor
         .build()
         .then((buildObject) => {
             const buildDir = 'build'; // check why it's not an object...
