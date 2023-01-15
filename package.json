@@ -1,6 +1,6 @@
 {
   "name": "@srcld/bpc-sdk-unofficial",
-  "version": "0.1.2",
+  "version": "0.1.3-0",
   "description": "NodeJS only toolkit to build Virtimo BPC Modules fast",
   "main": "sdk.js",
   "scripts": {
