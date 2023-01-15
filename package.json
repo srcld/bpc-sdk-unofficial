@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@muzkat/nextjs-tools": "^0.1.8",
-    "@srcld/war": "^0.0.5",
+    "@srcld/war": "^0.0.7",
     "shelljs": "^0.8.5"
   }
 }
