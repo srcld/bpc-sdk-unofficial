@@ -1,6 +1,10 @@
 const baseSettings = require('./baseSettings'),
     fs = require('fs')
 
+const settingsFilePrefix = 'default_',
+    settingsFileSuffix = '_settings.json',
+    defaultEncoding = 'utf-8';
+
 const createSettingsFromPartsObject = function (settingParts = {}) {
     const final = {};
     Object.keys(settingParts).map((partName) => {
@@ -23,18 +27,18 @@ const createSettingsFromPartsObject = function (settingParts = {}) {
     return final;
 }
 
-const writeFile = function (path, data, options = 'utf-8') {
+const writeFile = function (path, data, options = defaultEncoding) {
     return fs.writeFileSync(path, data, options)
 }
 
-const readFile = function (path, options = 'utf-8') {
+const readFile = function (path, options = defaultEncoding) {
     return fs.readFileSync(path, options);
 }
 
 const createSettingsFile = function (obj = {}, type = '', path = '') {
     const settingsJson = createSettingsFromPartsObject(obj);
     const settingsText = JSON.stringify(settingsJson, undefined, 4);
-    writeFile((path.length ? path : '') + 'default_' + type + '_settings.json', settingsText);
+    writeFile((path.length ? path : '') + settingsFilePrefix + type + settingsFileSuffix, settingsText);
 }
 
 const readSettingsFile = function (path) {
