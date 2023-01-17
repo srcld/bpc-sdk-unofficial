@@ -145,7 +145,11 @@ const createTag = function (tagMessage = '') {
     return true;
 }
 
-const doRelease = function () {
+const doRelease = function (options = {
+    releaseVersionInJira: false,
+    fileServerBaseUrl: "",
+    releaseTagPrefix: undefined
+}) {
     if (!systemCheck()) {
         ///
         return;
@@ -153,9 +157,21 @@ const doRelease = function () {
     const {release, nextVersion} = updateVersionInGradleProperties();
     const commitText = (release ? releaseCommitPrefix : devCommitPrefix) + prefixVersionDivider + nextVersion;
     const tagMessage = release ? (tagPrefix + nextVersion) : undefined;
+
+    // todo add option to push to another branch
     commitAndPushAllChanges(commitText);
     if (release) createTag(tagMessage);
+
+    if (options && options.releaseVersionInJira) {
+
+    }
 };
+
+const fileExistsOnRemote = function () {
+    // get version id of unreleased jira version
+    // check file on fileServer
+    // set version release status based on fileServer status
+}
 
 
 module.exports = {updateVersionInGradleProperties, doRelease, createTag, commitAndPushAllChanges}
