@@ -85,7 +85,7 @@ const updateVersionInGradleProperties = function (file = propertiesFile) {
 
 const systemCheck = function () {
     if (!shell.which('git')) {
-        shell.echo('Sorry, this script requires git');
+        consoleShell('Sorry, this script requires git');
         return false;
     }
     return true;
@@ -100,17 +100,30 @@ const commitAndPushAllChanges = function (commitMessage = '') {
         return;
     }
 
-    if (shell.exec('git commit -am "' + commitMessage + '"').code !== 0) {
-        shell.echo('Error: Git commit failed');
+    if (runError(exec('git commit -am "' + commitMessage + '"'))) {
+        consoleShell('Error: Git commit failed');
         return false
     }
 
-    if (shell.exec('git push').code !== 0) {
-        shell.echo('Error: Git push failed');
+    if (runError(exec('git push'))) {
+        consoleShell('Error: Git push failed');
         return false
     }
 
     return true;
+}
+
+const exec = function (cmd = '') {
+    return shell.exec(cmd);
+}
+
+const runError = function (execObj = {}) {
+    const {code} = execObj;
+    return code !== 0;
+};
+
+const consoleShell = function (message = '') {
+    shell.echo(message);
 }
 
 const createTag = function (tagMessage = '') {
@@ -119,13 +132,13 @@ const createTag = function (tagMessage = '') {
         return;
     }
 
-    if (shell.exec('git tag "' + tagMessage + '"').code !== 0) {
-        shell.echo('Error: Git tagging failed');
+    if (runError(exec('git tag "' + tagMessage + '"'))) {
+        consoleShell('Error: Git tagging failed');
         return false
     }
 
-    if (shell.exec('git push --tags').code !== 0) {
-        shell.echo('Error: Git pushing tags failed');
+    if (runError(exec('git push --tags'))) {
+        consoleShell('Error: Git pushing tags failed');
         return false
     }
 
