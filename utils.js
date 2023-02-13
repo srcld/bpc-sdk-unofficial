@@ -58,8 +58,8 @@ const getManifest = (applicationDisplayName = '', moduleName = '', version = '0.
 }
 
 
-const getWarBuildConfigObject = (moduleName = '', targetFolder = 'build', sources = [], manifestData = []) => {
-    return {name: moduleName, targetFolder: targetFolder, sources: sources, manifestArray: manifestData};
+const getWarBuildConfigObject = (moduleName = '', targetFolder = 'build', sources = [], manifestData = [], clean = true) => {
+    return {name: moduleName, targetFolder: targetFolder, sources: sources, manifestArray: manifestData, clean};
 }
 
 module.exports = {getManifest, getWarBuildConfigObject}
