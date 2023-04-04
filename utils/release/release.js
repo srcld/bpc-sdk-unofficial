@@ -5,7 +5,6 @@ const {readFileSync, writeFileSync} = require('fs'),
 ////////////////// FILE HANDLING
 
 const propertiesFile = 'gradle.properties';
-const versionProperty = 'version';
 const developmentSuffix = '-SNAPSHOT';
 
 const releaseCommitPrefix = 'Release';
@@ -36,11 +35,11 @@ const arrayToProps = function (data = []) {
     return data.map((obj) => obj.key + '=' + obj.value).join('\n');
 }
 
-const updateVersion = function (array = []) {
+const updateVersion = function (array = [], versionKey) {
     let exitCode, nextVersion;
 
     const newPropsArray = array.map((obj) => {
-        if (obj.key === versionProperty) {
+        if (obj.key === versionKey) {
             if (obj.value.endsWith(developmentSuffix)) {
                 obj.value = obj.value.replace(developmentSuffix, '');
                 exitCode = 0;
@@ -71,11 +70,11 @@ const write = (data) => {
  *
  * @returns {{release: boolean, nextVersion}}
  */
-const updateVersionInGradleProperties = function (file = propertiesFile) {
+const updateVersionInGradleProperties = function (file = propertiesFile, versionKey) {
     const dataBefore = read(file);
     const arrayData = propsToArray(dataBefore);
     console.table(arrayData);
-    const {release, data, nextVersion} = updateVersion(arrayData);
+    const {release, data, nextVersion} = updateVersion(arrayData, versionKey);
     const text = arrayToProps(data);
     log('UPDATED GRADLE PROPERTIES: ');
     log(text);
@@ -94,7 +93,7 @@ const systemCheck = function () {
 
 ////// GIT stuff
 
-const commitAndPushAllChanges = function (commitMessage = '') {
+const commitAndPushAllChanges = function (commitMessage = '', push = true) {
     if (commitMessage.length === 0) {
         ///
         return;
@@ -105,11 +104,17 @@ const commitAndPushAllChanges = function (commitMessage = '') {
         return false
     }
 
+    if (push) {
+        return pushChanges();
+    }
+    return true;
+}
+
+const pushChanges = function () {
     if (runError(exec('git push'))) {
         consoleShell('Error: Git push failed');
         return false
     }
-
     return true;
 }
 
@@ -145,33 +150,46 @@ const createTag = function (tagMessage = '') {
     return true;
 }
 
-const doRelease = function (options = {
-    releaseVersionInJira: false,
-    fileServerBaseUrl: "",
-    releaseTagPrefix: undefined
-}) {
-    if (!systemCheck()) {
-        ///
-        return;
-    }
-    const {release, nextVersion} = updateVersionInGradleProperties();
-    const commitText = (release ? releaseCommitPrefix : devCommitPrefix) + prefixVersionDivider + nextVersion;
-    const tagMessage = release ? (tagPrefix + nextVersion) : undefined;
-
-    // todo add option to push to another branch
-    commitAndPushAllChanges(commitText);
-    if (release) createTag(tagMessage);
-
-    if (options && options.releaseVersionInJira) {
-
-    }
-};
-
-const fileExistsOnRemote = function () {
-    // get version id of unreleased jira version
-    // check file on fileServer
-    // set version release status based on fileServer status
+const getCommitMessage = function (release, nextVersion) {
+    return (release ? releaseCommitPrefix : devCommitPrefix) + prefixVersionDivider + nextVersion;
 }
 
+const getTagMessage = function (nextVersion) {
+    return tagPrefix + nextVersion;
+}
+const doRelease = function (options = {
+    versionKeys: ['version']
+}) {
+    if (!systemCheck()) {
+        log('SORRY, SYSTEM CHECK FAILED.');
+        return;
+    }
+
+    let {versionKeys = []} = options;
+    log('VERSION KEYS LENGTH: ' + versionKeys.length);
+    if (versionKeys.length === 0) {
+        log('NO VERSION KEY DEFINED');
+        return;
+    }
+
+    log('UPDATING VERSION FILES....');
+
+    versionKeys
+        .map((versionKey) => {
+            const {release, nextVersion} = updateVersionInGradleProperties(undefined, versionKey);
+            const commitText = getCommitMessage(release, nextVersion);
+            log('COMMITTING: ' + commitText);
+            commitAndPushAllChanges(commitText, false);
+            if (release) {
+                let msg = getTagMessage(nextVersion);
+                log('TAGGING: ' + msg);
+                createTag(msg);
+            }
+        })
+
+    log('PUSH UPPP');
+    pushChanges();
+    log('DONE.');
+};
 
 module.exports = {updateVersionInGradleProperties, doRelease, createTag, commitAndPushAllChanges}
