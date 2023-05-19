@@ -1,6 +1,7 @@
 const nExtJs = require('@muzkat/nextjs-tools'),
     war = require('@srcld/war'),
     {getBuildFile} = require('./utils/buildFile'),
+    {getSourcesArray, prepareWorkspace} = require('./utils/file/dir'),
     {
         createSettingsFile,
         handleSettings,
@@ -49,20 +50,14 @@ const buildPackage = (moduleName = '', applicationName = '', settings = {}, vers
     return getBPCBuilder(moduleName)
         .build()
         .then((buildObject) => {
-            const buildDir = 'build'; // check why it's not an object...
-            let resourcesBasePath = './' + buildDir + '/' + moduleName + '/resources';
-            war.createFolderIfNotPresent(resourcesBasePath);
-            resourcesBasePath += '/defaults';
-            war.createFolderIfNotPresent(resourcesBasePath);
+            let resourcesBasePath = prepareWorkspace(moduleName);
             handleSettings(settings, resourcesBasePath + '/');
-            return [{
-                source: [buildDir, moduleName].join('/'),
-                target: false
-            }];
+            return getSourcesArray(moduleName);
         }).then((sources) => {
             return buildWar(moduleName, sources, applicationName, version, buildInfo)
         })
 }
+
 
 const buildLegacyBpcPackage = function (moduleName) {
     // overwrite internal config to fit to Sencha Cmd legacy standards
@@ -76,16 +71,10 @@ const buildLegacyBpcPackage = function (moduleName) {
     return buildDescriptor
         .build()
         .then((buildObject) => {
-            const buildDir = 'build'; // check why it's not an object...
-            let resourcesBasePath = './' + buildDir + '/' + moduleName + '/resources';
-            war.createFolderIfNotPresent(resourcesBasePath);
-            resourcesBasePath += '/defaults';
-            war.createFolderIfNotPresent(resourcesBasePath);
-            // handleSettings(settings, resourcesBasePath + '/');
-            return [{
-                source: [buildDir, moduleName].join('/'),
-                target: false
-            }];
+            prepareWorkspace(moduleName);
+            // in legacy build we do not want "our" setting handling - leave it as is
+            // ignored therefore now -> handleSettings(settings, resourcesBasePath + '/');
+            return getSourcesArray(moduleName);
         }).then((sources) => {
             return buildWar(moduleName, sources, '', 'foo', 'bar')
         })
