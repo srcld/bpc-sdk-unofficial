@@ -158,19 +158,21 @@ const getTagMessage = function (nextVersion) {
     return tagPrefix + nextVersion;
 }
 const doRelease = function (options = {
-    versionKeys: ['version']
+    versionKeys: ['version'],
+    dry: false
 }) {
     if (!systemCheck()) {
         log('SORRY, SYSTEM CHECK FAILED.');
         return;
     }
 
-    let {versionKeys = []} = options;
+    let {dry, versionKeys = []} = options;
     log('VERSION KEYS LENGTH: ' + versionKeys.length);
     if (versionKeys.length === 0) {
         log('NO VERSION KEY DEFINED');
         return;
     }
+    if (dry) log('DRY RUN')
 
     log('UPDATING VERSION FILES....');
 
@@ -179,16 +181,16 @@ const doRelease = function (options = {
             const {release, nextVersion} = updateVersionInGradleProperties(undefined, versionKey);
             const commitText = getCommitMessage(release, nextVersion);
             log('COMMITTING: ' + commitText);
-            commitAndPushAllChanges(commitText, false);
+            if (!dry) commitAndPushAllChanges(commitText, false);
             if (release) {
                 let msg = getTagMessage(nextVersion);
                 log('TAGGING: ' + msg);
-                createTag(msg);
+                if (!dry) createTag(msg);
             }
         })
 
     log('PUSH UPPP');
-    pushChanges();
+    if (!dry) pushChanges();
     log('DONE.');
 };
 
