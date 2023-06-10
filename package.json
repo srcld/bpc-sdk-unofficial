@@ -18,7 +18,7 @@
     "bpc-sdk-unofficial": "./cli.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "CC BY-NC-ND 4.0",
   "bugs": {
     "url": "https://github.com/srcld/bpc-sdk-unofficial/issues"
   },
