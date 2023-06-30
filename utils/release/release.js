@@ -64,6 +64,16 @@ const write = (data) => {
     writeFileSync(propertiesFile, data);
 }
 
+const readGradlePropertiesAsArray = function (file = propertiesFile) {
+    const dataBefore = read(file);
+    return propsToArray(dataBefore);
+}
+
+const readKeyFromGradleProperties = function (key) {
+    const match = readGradlePropertiesAsArray().filter((item) => item.key === key);
+    return match.length ? (match[0].value || '') : '';
+}
+
 /**
  * This functions will update your gradle.properties file automatically,
  * in order to support side by side builds using Sencha Cmd
@@ -71,8 +81,7 @@ const write = (data) => {
  * @returns {{release: boolean, nextVersion}}
  */
 const updateVersionInGradleProperties = function (file = propertiesFile, versionKey) {
-    const dataBefore = read(file);
-    const arrayData = propsToArray(dataBefore);
+    const arrayData = readGradlePropertiesAsArray(file);
     console.table(arrayData);
     const {release, data, nextVersion} = updateVersion(arrayData, versionKey);
     const text = arrayToProps(data);
@@ -194,4 +203,4 @@ const doRelease = function (options = {
     log('DONE.');
 };
 
-module.exports = {updateVersionInGradleProperties, doRelease, createTag, commitAndPushAllChanges}
+module.exports = {updateVersionInGradleProperties, doRelease, createTag, commitAndPushAllChanges, readKeyFromGradleProperties}
