@@ -19,11 +19,13 @@ const getSourcesArray = function (moduleName) {
     }];
 }
 
-const prepareWorkspace = function (moduleName) {
+const prepareWorkspace = function (moduleName, createDefaultsFolder = true) {
     let resourcesBasePath = getResourcesBasePath(moduleName);
     war.createFolderIfNotPresent(resourcesBasePath);
-    resourcesBasePath += '/' + settingsDir;
-    war.createFolderIfNotPresent(resourcesBasePath);
+    if(createDefaultsFolder){
+        resourcesBasePath += '/' + settingsDir;
+        war.createFolderIfNotPresent(resourcesBasePath);
+    }
     return resourcesBasePath;
 }
 
