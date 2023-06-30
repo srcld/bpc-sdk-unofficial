@@ -59,7 +59,9 @@ const buildPackage = (moduleName = '', applicationName = '', settings = {}, vers
 }
 
 
-const buildLegacyBpcPackage = function (moduleName) {
+const buildLegacyBpcPackage = function (moduleName, version) {
+    version = version || release.readKeyFromGradleProperties('version');
+    moduleName = moduleName || release.readKeyFromGradleProperties('packageName');
     // overwrite internal config to fit to Sencha Cmd legacy standards
     // todo read corresponding files from repo
     const buildDescriptor = getBPCBuilder(moduleName);
@@ -67,16 +69,17 @@ const buildLegacyBpcPackage = function (moduleName) {
         buildDescriptor.buildFile.srcDir = 'packages'
         buildDescriptor.buildFile.packagesDir = 'local'
     }
-    // todo handle settings, buildInfo, version
+
+    // todo handle settings
     return buildDescriptor
         .build()
         .then((buildObject) => {
-            prepareWorkspace(moduleName);
+            prepareWorkspace(moduleName, false);
             // in legacy build we do not want "our" setting handling - leave it as is
             // ignored therefore now -> handleSettings(settings, resourcesBasePath + '/');
             return getSourcesArray(moduleName);
         }).then((sources) => {
-            return buildWar(moduleName, sources, '', 'foo', 'bar')
+            return buildWar(moduleName, sources, '', version);
         })
 }
 
