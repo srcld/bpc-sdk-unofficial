@@ -1,5 +1,7 @@
 const prefix = '/bpc-fe-';
 
+const shell = require('shelljs')
+
 /**
  * get BPC compliant bundle name
  *
@@ -28,7 +30,29 @@ const bpcDefaults = {
     'BPC-Bundle': 'true',
     'BPC-Bundle-Type': 'fe-only'
 }
-const getManifest = (applicationDisplayName = '', moduleName = '', version = '0.0.1', buildInfo = 'NOT DEFINED') => {
+
+/**
+ * creates BPC specific buildInfo stamp
+ * example:
+ * main-c82cddf-dirty=false-2023-06-30T16:55:58.188Z
+ * @returns {string}
+ */
+const getBuildInfo = function () {
+    let buildInfo = '';
+    try {
+        let branchName = shell.exec('git branch --show-current').stdout;
+        let commitId = shell.exec('git rev-parse --short HEAD').stdout;
+        let dirty = shell.exec('git diff --quiet').code === 0;
+        buildInfo = [branchName, commitId, ('dirty=' + dirty), new Date().toISOString()].map((f) => f.trim()).join('-');
+    } catch (e) {
+        buildInfo = '';
+    }
+    return buildInfo;
+}
+
+const getManifest = (applicationDisplayName = '', moduleName = '', version = '0.0.1', buildInfo) => {
+
+    buildInfo = buildInfo || getBuildInfo()
 
     const manifestArray = [{
         key: 'Bundle-SymbolicName', value: applicationDisplayName
@@ -37,7 +61,7 @@ const getManifest = (applicationDisplayName = '', moduleName = '', version = '0.
     }, {
         key: 'Bundle-Version', value: version
     }, {
-        key: 'Build', value: buildInfo
+        key: 'BPC-Build', value: buildInfo
     }, {
         key: 'Web-ContextPath', value: compatPathBuilder(moduleName)
     }, {
@@ -62,4 +86,4 @@ const getWarBuildConfigObject = (moduleName = '', targetFolder = 'build', source
     return {name: moduleName, targetFolder: targetFolder, sources: sources, manifestArray: manifestData, clean};
 }
 
-module.exports = {getManifest, getWarBuildConfigObject}
+module.exports = {getManifest, getWarBuildConfigObject, getBuildInfo}
