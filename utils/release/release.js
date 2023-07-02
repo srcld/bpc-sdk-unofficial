@@ -1,6 +1,7 @@
 const {readFileSync, writeFileSync} = require('fs'),
-    shell = require('shelljs'),
-    log = console.log;
+    shell = require('shelljs');
+const {logLine, log} = require("@muzkat/nextjs-tools/utils/log");
+
 
 ////////////////// FILE HANDLING
 
@@ -13,8 +14,8 @@ const prefixVersionDivider = ': ';
 
 const tagPrefix = 'v.';
 
-const read = function (path) {
-    return readFileSync(path, 'utf8');
+const read = function (path, encoding = 'utf8') {
+    return readFileSync(path, encoding);
 }
 
 const propsToArray = function (data = '') {
@@ -72,6 +73,15 @@ const readGradlePropertiesAsArray = function (file = propertiesFile) {
 const readKeyFromGradleProperties = function (key) {
     const match = readGradlePropertiesAsArray().filter((item) => item.key === key);
     return match.length ? (match[0].value || '') : '';
+}
+
+const readJson = function (path) {
+    let jsonString = read(path);
+    try {
+        return JSON.parse(jsonString);
+    } catch (e) {
+        return null;
+    }
 }
 
 /**
@@ -203,4 +213,11 @@ const doRelease = function (options = {
     log('DONE.');
 };
 
-module.exports = {updateVersionInGradleProperties, doRelease, createTag, commitAndPushAllChanges, readKeyFromGradleProperties}
+module.exports = {
+    updateVersionInGradleProperties,
+    doRelease,
+    createTag,
+    commitAndPushAllChanges,
+    readKeyFromGradleProperties,
+    readJson
+}
