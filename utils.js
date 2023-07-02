@@ -1,6 +1,6 @@
-const prefix = '/bpc-fe-';
+const shell = require('shelljs');
 
-const shell = require('shelljs')
+const prefix = '/bpc-fe-';
 
 /**
  * get BPC compliant bundle name
