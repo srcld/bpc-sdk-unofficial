@@ -4,7 +4,44 @@ const sdk = require('./sdk');
 const args = process.argv.slice(2);
 let log = console.log;
 // supported arguments
-const supported = ['test', 'release'];
+const supported = ['test', 'release', 'build'];
+
+const handle = {
+    release: function (isRelease) {
+        console.table(args);
+        // process.exit();
+
+        let dry = false;
+        const versionKeys = [];
+        args.forEach(function (val, index, array) {
+            if ((val || '') === '--dry') {
+                dry = true;
+                log('DRY RUN ENABLED')
+            } else {
+                log('no')
+                log(val);
+            }
+            let value = val || '';
+            if (isRelease && value.length && val !== 'release' && val !== '--dry') versionKeys.push(value);
+        });
+
+        // console.log('Yo: ' + method);
+        // TODO implement method handling
+
+        console.log('Versions to build:');
+        console.table(versionKeys);
+        // process.exit();
+
+        if (isRelease) {
+            const versionsToBuild = versionKeys.length ? versionKeys : ['version'];
+            sdk.release.doRelease({versionKeys: versionsToBuild, dry})
+        }
+    },
+    build: function () {
+        sdk.buildLegacyBpcPackage();
+    }
+}
+
 
 if (!args.length) {
     console.log("Warning: No arguments");
@@ -18,34 +55,12 @@ if (!args.length) {
         process.exit();
     }
 
-    isRelease = method === 'release';
+    // isRelease = method === 'release';
 
-    console.table(args);
-    // process.exit();
-
-    let dry = false;
-    const versionKeys = [];
-    args.forEach(function (val, index, array) {
-        if ((val || '') === '--dry') {
-            dry = true;
-            log('DRY RUN ENABLED')
-        } else {
-            log('no')
-            log(val);
-        }
-        let value = val || '';
-        if (isRelease && value.length && val !== 'release' && val !== '--dry') versionKeys.push(value);
-    });
-
-    console.log('Yo: ' + method);
-    // TODO implement method handling
-
-    console.log('Versions to build:');
-    console.table(versionKeys);
-    // process.exit();
-
-    if (isRelease) {
-        const versionsToBuild = versionKeys.length ? versionKeys : ['version'];
-        sdk.release.doRelease({versionKeys: versionsToBuild, dry})
+    if (handle[method]) {
+        console.log(method + ' DETECTED');
+        handle[method](true);
     }
+
+
 }
