@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 const sdk = require('./sdk');
+const {bumpPomXml} = require("./utils/release/release");
 
 const args = process.argv.slice(2);
 let log = console.log;
 // supported arguments
-const supported = ['test', 'release', 'build'];
+const supported = ['test', 'release', 'build', 'xml'];
 
 const handle = {
     release: function (isRelease) {
@@ -36,6 +37,9 @@ const handle = {
             const versionsToBuild = versionKeys.length ? versionKeys : ['version'];
             sdk.release.doRelease({versionKeys: versionsToBuild, dry})
         }
+    },
+    xml: function () {
+        bumpPomXml();
     },
     build: function () {
         sdk.buildLegacyBpcPackage();

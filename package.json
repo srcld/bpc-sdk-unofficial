@@ -27,9 +27,10 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "dependencies": {
-    "@muzkat/grepcat": "^0.1.4",
+    "@muzkat/grepcat": "^0.1.6",
     "@muzkat/nextjs-tools": "^0.1.8",
     "@srcld/war": "^0.0.8",
+    "cheerio": "^1.0.0-rc.12",
     "shelljs": "^0.8.5"
   }
 }

@@ -1,5 +1,6 @@
 const {readFileSync, writeFileSync} = require('fs'),
-    shell = require('shelljs');
+    shell = require('shelljs'),
+    cheerio = require('cheerio');
 const {logLine, log} = require("@muzkat/nextjs-tools/utils/log");
 
 
@@ -16,6 +17,27 @@ const tagPrefix = 'v.';
 
 const read = function (path, encoding = 'utf8') {
     return readFileSync(path, encoding);
+}
+
+const bumpPomXml = function (dry = false) {
+    let release = false;
+    let data = read('pom.xml')
+
+    let pomCheerio = cheerio.load(data, {
+        xmlMode: true
+    });
+    let foo = pomCheerio('project > version');
+
+    let version = foo.text(),
+        next = bumpVersion(version);
+    if (!next.endsWith(developmentSuffix)) release = true;
+
+    log('VERSION FOUND  : ' + version);
+    log('NEXT VERSION   : ' + next);
+
+    exec('mvn versions:set -DgenerateBackupPoms=false -DnewVersion=' + next);
+    commitChanges(release, next, dry);
+    if (!dry) pushChanges();
 }
 
 const propsToArray = function (data = '') {
@@ -36,21 +58,28 @@ const arrayToProps = function (data = []) {
     return data.map((obj) => obj.key + '=' + obj.value).join('\n');
 }
 
+const bumpVersion = function (versionStr) {
+    if (versionStr.endsWith(developmentSuffix)) {
+        versionStr = versionStr.replace(developmentSuffix, '');
+        // exitCode = 0;
+    } else {
+        let versionParts = versionStr.split('.').map((s) => parseInt(s));
+        versionParts[versionParts.length - 1] = versionParts[versionParts.length - 1] + 1;
+        versionStr = versionParts.join('.') + developmentSuffix;
+        // exitCode = 1;
+    }
+    return versionStr;
+}
+
 const updateVersion = function (array = [], versionKey) {
-    let exitCode, nextVersion;
+    let exitCode = 0, nextVersion;
 
     const newPropsArray = array.map((obj) => {
         if (obj.key === versionKey) {
-            if (obj.value.endsWith(developmentSuffix)) {
-                obj.value = obj.value.replace(developmentSuffix, '');
-                exitCode = 0;
-            } else {
-                let versionParts = obj.value.split('.').map((s) => parseInt(s));
-                versionParts[versionParts.length - 1] = versionParts[versionParts.length - 1] + 1;
-                obj.value = versionParts.join('.') + developmentSuffix;
-                exitCode = 1;
-            }
-            nextVersion = obj.value;
+            let {value} = obj;
+            nextVersion = bumpVersion(value);
+            if (nextVersion.endsWith(developmentSuffix)) exitCode = 1;
+            obj.value = nextVersion;
         }
         return obj;
     });
@@ -198,14 +227,7 @@ const doRelease = function (options = {
     versionKeys
         .map((versionKey) => {
             const {release, nextVersion} = updateVersionInGradleProperties(undefined, versionKey);
-            const commitText = getCommitMessage(release, nextVersion);
-            log('COMMITTING: ' + commitText);
-            if (!dry) commitAndPushAllChanges(commitText, false);
-            if (release) {
-                let msg = getTagMessage(nextVersion);
-                log('TAGGING: ' + msg);
-                if (!dry) createTag(msg);
-            }
+            commitChanges(release, nextVersion, dry);
         })
 
     log('PUSH UPPP');
@@ -213,11 +235,23 @@ const doRelease = function (options = {
     log('DONE.');
 };
 
+const commitChanges = function (release, nextVersion, dry) {
+    const commitText = getCommitMessage(release, nextVersion);
+    log('COMMITTING: ' + commitText);
+    if (!dry) commitAndPushAllChanges(commitText, false);
+    if (release) {
+        let msg = getTagMessage(nextVersion);
+        log('TAGGING: ' + msg);
+        if (!dry) createTag(msg);
+    }
+}
+
 module.exports = {
     updateVersionInGradleProperties,
     doRelease,
     createTag,
     commitAndPushAllChanges,
     readKeyFromGradleProperties,
-    readJson
+    readJson,
+    bumpPomXml
 }
