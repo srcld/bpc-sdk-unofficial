@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 const sdk = require('./sdk');
 const {bumpPomXml} = require("./utils/release/release");
+const {fileExists} = require("./utils/file/file");
 
 const args = process.argv.slice(2);
 let log = console.log;
 // supported arguments
 const supported = ['test', 'release', 'build', 'xml'];
+
+const isValidRepo = function (fileName = '') {
+    let path = './' + fileName;
+    let exists = fileExists(path);
+    if (!exists) log('Version file does not exist: ' + fileName);
+    return exists === true;
+}
 
 const handle = {
     release: function (isRelease) {
@@ -33,13 +41,13 @@ const handle = {
         console.table(versionKeys);
         // process.exit();
 
-        if (isRelease) {
+        if (isRelease && isValidRepo('gradle.properties')) {
             const versionsToBuild = versionKeys.length ? versionKeys : ['version'];
             sdk.release.doRelease({versionKeys: versionsToBuild, dry})
         }
     },
     xml: function () {
-        bumpPomXml();
+        if (isValidRepo('pom.xml')) bumpPomXml();
     },
     build: function () {
         sdk.buildLegacyBpcPackage();
@@ -48,21 +56,21 @@ const handle = {
 
 
 if (!args.length) {
-    console.log("Warning: No arguments");
+    log("Warning: No arguments");
     process.exit();
 } else {
     const method = args[0];
     let isRelease;
 
     if (supported.indexOf(method) === -1) {
-        console.log("Warning: Method no supported");
+        log("Warning: Method no supported");
         process.exit();
     }
 
     // isRelease = method === 'release';
 
     if (handle[method]) {
-        console.log(method + ' DETECTED');
+        log(method + ' DETECTED');
         handle[method](true);
     }
 
