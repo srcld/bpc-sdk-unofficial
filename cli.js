@@ -15,6 +15,25 @@ const isValidRepo = function (fileName = '') {
     return exists === true;
 }
 
+const pomFile = 'pom.xml';
+const gradleFile = 'gradle.properties';
+
+const versionFiles = [{file: pomFile, method: 'xml'}, {file: gradleFile, method: 'release'}];
+
+const detectRepo = function () {
+    const matches = versionFiles.filter((obj) => {
+        let {file, method} = obj;
+        return fileExists(file);
+    });
+    if (matches.length && matches.length === 1) {
+        log(matches[0].method + ' detected');
+        return matches[0].method;
+    } else {
+        log('repo / env / path not valid');
+    }
+}
+
+
 const handle = {
     release: function (isRelease) {
         console.table(args);
@@ -54,6 +73,7 @@ const handle = {
     }
 }
 
+log('BPC SDK - unofficial');
 
 if (!args.length) {
     log("Warning: No arguments");
@@ -71,7 +91,13 @@ if (!args.length) {
 
     if (handle[method]) {
         log(method + ' DETECTED');
-        handle[method](true);
+        let methodDetected = detectRepo();
+        if (methodDetected === method) {
+            log('nice.')
+            handle[method](true);
+        }else{
+            log('Method wont run. Sorry. Consult the docs.')
+        }
     }
 
 
