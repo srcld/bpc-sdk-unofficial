@@ -1,8 +1,8 @@
 # bpc-sdk-unofficial
 
-Virtimo :tm: BPC :tm: Modules are special ExtJS :tm: packages, distributed as osgi ready Java :tm: web archives. 
+Virtimo:tm: BPC:tm: Modules are special ExtJS:tm: packages, distributed as osgi ready Java:tm: web archives. 
 
-We built a modern NodeJS only toolkit for that purpose.
+We built a modern Node.js:tm: only toolkit for that purpose.
 
 We try to keep dependencies as limited as possible. 
 
@@ -15,12 +15,12 @@ We try to keep dependencies as limited as possible.
 * cli
 
 
-* you do not need ExtJS during build time
+* you do not need ExtJS:tm: during build time
 * fast and easy setup - basically install & lets go
 
 ## Requirements
 
-* npm, nodejs
+* npm:tm:, Node.js:tm:
 
 ## Install
 
@@ -41,3 +41,7 @@ Virtimo, BPC are trademarks of Virtimo AG, registered in Germany and probably ot
 ExtJs is a registered trademark of Sencha Inc. and/or its affiliates.
 
 Java is a registered trademark of Oracle and/or its affiliates.
+
+Node.js is a registered trademark of OpenJS Foundation and/or its affiliates.
+
+npm is a registered trademark of npm Inc. and/or its affiliates.
