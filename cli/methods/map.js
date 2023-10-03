@@ -1,7 +1,8 @@
 const sdk = require("../../sdk");
 const {bumpPomXml} = require("../../utils/release/release");
+const {doLog} = require("../../utils/log/sourlog");
 
-let {log, table} = console;
+let {table} = console;
 
 let props = {
     dry: '--dry'
@@ -18,13 +19,13 @@ const handle = {
         args.forEach(function (val, index, array) {
             if ((val || '') === props.dry) {
                 dry = true;
-                log('DRY RUN ENABLED')
+                doLog('DRY RUN ENABLED')
             }
             let value = val || '';
             if (value.length && val !== 'release' && val !== props.dry) versionKeys.push(value);
         });
 
-        log('Versions to build:');
+        doLog('Versions to build:');
         table(versionKeys);
 
         const versionsToBuild = versionKeys.length ? versionKeys : ['version'];
