@@ -1,9 +1,9 @@
 const {fileExists} = require("../../utils/file/file");
-let log = console.log;
+const {doLog} = require("../../utils/log/sourlog");
 const isValidRepo = function (fileName = '') {
     let path = './' + fileName;
     let exists = fileExists(path);
-    if (!exists) log('Version file does not exist: ' + fileName);
+    if (!exists) doLog('Version file does not exist: ' + fileName);
     return exists === true;
 }
 
@@ -18,10 +18,10 @@ const detectRepo = function () {
         return fileExists(file);
     });
     if (matches.length && matches.length === 1) {
-        log(matches[0].method + ' detected');
+        doLog(matches[0].method + ' detected');
         return matches[0].method;
     } else {
-        log('repo / env / path not valid');
+        doLog('repo / env / path not valid');
     }
 }
 
