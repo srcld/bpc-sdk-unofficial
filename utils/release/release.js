@@ -2,11 +2,12 @@ const {readFileSync, writeFileSync} = require('fs'),
     shell = require('shelljs'),
     cheerio = require('cheerio');
 const {logLine, log} = require("@muzkat/nextjs-tools/utils/log");
+const {FILE_NAME_POM, FILE_NAME_GRADLE} = require("../props");
 
 
 ////////////////// FILE HANDLING
 
-const propertiesFile = 'gradle.properties';
+const propertiesFile = FILE_NAME_GRADLE;
 const developmentSuffix = '-SNAPSHOT';
 
 const releaseCommitPrefix = 'Release';
@@ -19,9 +20,24 @@ const read = function (path, encoding = 'utf8') {
     return readFileSync(path, encoding);
 }
 
+const getArtifactIdFromXml = function (){
+    let data = read(FILE_NAME_POM)
+
+    let pomCheerio = cheerio.load(data, {
+        xmlMode: true
+    });
+    return pomCheerio('project > artifactId').text();
+}
+
+const getValueFromGradleProperties = function (key = 'packageName', file = propertiesFile){
+    const arrayData = readGradlePropertiesAsArray(file);
+    let match = arrayData.filter((obj) => obj.key === key);
+    return match.length ? match[0].value : undefined;
+}
+
 const bumpPomXml = function (dry = false) {
     let release = false;
-    let data = read('pom.xml')
+    let data = read(FILE_NAME_POM)
 
     let pomCheerio = cheerio.load(data, {
         xmlMode: true
@@ -253,5 +269,7 @@ module.exports = {
     commitAndPushAllChanges,
     readKeyFromGradleProperties,
     readJson,
-    bumpPomXml
+    bumpPomXml,
+    getArtifactIdFromXml,
+    getValueFromGradleProperties
 }
