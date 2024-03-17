@@ -1,5 +1,5 @@
 const sdk = require("../../sdk");
-const {bumpPomXml} = require("../../utils/release/release");
+const {bumpPomXml, getValueFromGradleProperties} = require("../../utils/release/release");
 const {doLog} = require("../../utils/log/sourlog");
 const {fileExists} = require("../../utils/file/file");
 const {readSettingsFile} = require("../../sdk");
@@ -7,6 +7,8 @@ const {getModuleName} = require("../../utils/repo/repo");
 const {detectRepoVariant} = require("../env/env_repo"),
     {writeFileSync} = require('fs');
 const {readFile} = require("@muzkat/grepcat/src/pusher/pusher");
+const {buildEnv} = require("../env/env");
+const {BPC_DEPLOY_URL} = require("../../utils/props");
 
 let {table} = console;
 
@@ -39,6 +41,55 @@ const handle = {
     },
     xml: function (args) {
         bumpPomXml();
+    },
+    deploy: async function (params = {}) {
+        let feOrBe = detectRepoVariant();
+        if (feOrBe) {
+            if (feOrBe === 'fe') {
+                doLog('FRONTEND MODULE');
+
+                let ending = '.war';
+                let {host} = params;
+                let {systems} = buildEnv();
+                let url, key;
+                if (systems[host]) {
+                    url = systems[host].url;
+                    key = systems[host].key;
+                    doLog('SYSTEM FOUND.');
+                } else {
+                    doLog('SYSTEM ' + host + ' NOT FOUND. STOP.');
+                    return;
+                }
+
+                const packageName = getValueFromGradleProperties('packageName');
+                const bpcPrefix = getValueFromGradleProperties('bpcPrefix');
+
+                const targetFileName = bpcPrefix + packageName + ending;
+                const fileName = "build/" + targetFileName;
+
+                const body = new FormData();
+                const blob = new Blob([await readFile(fileName, null)]);
+                body.set("module_bundle", blob, targetFileName);
+
+                url += BPC_DEPLOY_URL;
+                doLog('URL       : ' + url);
+                doLog('KEY       : ' + key);
+
+                fetch(url + '', {
+                    method: 'POST',
+                    headers: {"x-apikey": key},
+                    body,
+                }).then((r) => {
+                    doLog('STATUS       : ' + r.status);
+                    doLog('STATUSTEXT   : ' + r.statusText);
+                    return r.json();
+                }).then((json) => {
+                    return console.log(json);
+                }).catch((e) => {
+                    console.debug(e);
+                });
+            }
+        }
     },
     build: function (args) {
         sdk.buildLegacyBpcPackage();

@@ -15,6 +15,7 @@ if (!args.length) {
     process.exit();
 } else {
     const method = args[0];
+    const host = args[1];
 
     const supportedArgumentsMethods = supportedArgumentNames.concat(otherArgumentNames);
 
@@ -24,7 +25,8 @@ if (!args.length) {
     }
 
     if (handle[method]) {
-        doLog(method + ' DETECTED');
+        doLog('METHOD   : ' + method + ' DETECTED');
+        doLog('HOST     : ' + host + ' DETECTED');
 
         let repoType = detectRepoVariant();
 
@@ -43,7 +45,7 @@ if (!args.length) {
                 return;
             }
 
-            if(method === 'deploy') return handle[method]();
+            if (method === 'deploy') return handle[method]({host});
 
             doLog('Method wont run. Sorry. Consult the docs.')
         }

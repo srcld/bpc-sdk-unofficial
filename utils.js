@@ -26,6 +26,7 @@ const defaults = {
     'Bundle-ManifestVersion': '2'
 };
 
+// TODO change - default is not fe-only
 const bpcDefaults = {
     'BPC-Bundle': 'true',
     'BPC-Bundle-Type': 'fe-only'

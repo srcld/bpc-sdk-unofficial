@@ -264,6 +264,7 @@ const commitChanges = function (release, nextVersion, dry) {
 
 module.exports = {
     updateVersionInGradleProperties,
+    exec,
     doRelease,
     createTag,
     commitAndPushAllChanges,
