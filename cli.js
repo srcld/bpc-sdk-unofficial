@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-const {detectRepo, detectRepoVariant} = require("./cli/env/env_repo");
 const {handle} = require("./cli/methods/map");
 const {doLog} = require("./utils/log/sourlog");
+const {detectRepo} = require("./utils/repo/repo");
 
 const args = process.argv.slice(2);
 
@@ -28,7 +28,7 @@ if (!args.length) {
         doLog('METHOD   : ' + method + ' DETECTED');
         doLog('HOST     : ' + host + ' DETECTED');
 
-        let repoType = detectRepoVariant();
+        let repoType = detectRepo(true);
 
         if (!repoType) {
             doLog('Repo not compliant');

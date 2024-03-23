@@ -1,12 +1,9 @@
 const sdk = require("../../sdk");
-const {bumpPomXml, getValueFromGradleProperties} = require("../../utils/release/release");
+const {bumpPomXml} = require("../../utils/release/release");
 const {doLog} = require("../../utils/log/sourlog");
-const {fileExists} = require("../../utils/file/file");
+const {fileExists, fileToFormData, writeFile} = require("../../utils/file/file");
 const {readSettingsFile} = require("../../sdk");
-const {getModuleName} = require("../../utils/repo/repo");
-const {detectRepoVariant} = require("../env/env_repo"),
-    {writeFileSync} = require('fs');
-const {readFile} = require("@muzkat/grepcat/src/pusher/pusher");
+const {getModuleName, detectRepo} = require("../../utils/repo/repo");
 const {buildEnv} = require("../env/env");
 const {BPC_DEPLOY_URL} = require("../../utils/props");
 
@@ -17,6 +14,19 @@ let props = {
 }
 
 // TODO extract dry run
+
+const getDeployFilename = function () {
+    let feOrBe = detectRepo(true);
+    let ending = feOrBe === 'fe' ? '.war' : '.jar';
+    return ['bpc', feOrBe, getModuleName()].join('-') + ending;
+}
+
+const getHostConfig = function (host) {
+    let {systems} = buildEnv();
+    if (systems[host]) {
+        return systems[host];
+    }
+}
 
 const handle = {
     release: function (args) {
@@ -43,35 +53,46 @@ const handle = {
         bumpPomXml();
     },
     deploy: async function (params = {}) {
-        let feOrBe = detectRepoVariant();
+        let {host} = params;
+        let cfg = getHostConfig(host);
+        if (!cfg) {
+            doLog('SYSTEM ' + host + ' NOT FOUND. STOP.');
+            return;
+        }
+
+        let feOrBe = detectRepo(true);
         if (feOrBe) {
             if (feOrBe === 'fe') {
                 doLog('FRONTEND MODULE');
 
-                let ending = '.war';
-                let {host} = params;
-                let {systems} = buildEnv();
-                let url, key;
-                if (systems[host]) {
-                    url = systems[host].url;
-                    key = systems[host].key;
-                    doLog('SYSTEM FOUND.');
-                } else {
-                    doLog('SYSTEM ' + host + ' NOT FOUND. STOP.');
-                    return;
-                }
-
-                const packageName = getValueFromGradleProperties('packageName');
-                const bpcPrefix = getValueFromGradleProperties('bpcPrefix');
-
-                const targetFileName = bpcPrefix + packageName + ending;
-                const fileName = "build/" + targetFileName;
-
-                const body = new FormData();
-                const blob = new Blob([await readFile(fileName, null)]);
-                body.set("module_bundle", blob, targetFileName);
-
+                let {url, key} = cfg;
                 url += BPC_DEPLOY_URL;
+                const targetFileName = getDeployFilename();
+                let body = await fileToFormData(['build', targetFileName].join('/'), targetFileName);
+
+                doLog('URL       : ' + url);
+                doLog('KEY       : ' + key);
+
+                fetch(url + '', {
+                    method: 'POST',
+                    headers: {"x-apikey": key},
+                    body,
+                }).then((r) => {
+                    doLog('STATUS       : ' + r.status);
+                    doLog('STATUSTEXT   : ' + r.statusText);
+                    return r.json();
+                }).then((json) => {
+                    return console.log(json);
+                }).catch((e) => {
+                    console.debug(e);
+                });
+            } else if (feOrBe === 'be') {
+                doLog('BACKEND MODULE');
+                let {url, key} = cfg;
+                url += BPC_DEPLOY_URL;
+                const targetFileName = getDeployFilename();
+                let body = await fileToFormData(['target', targetFileName].join('/'), targetFileName);
+
                 doLog('URL       : ' + url);
                 doLog('KEY       : ' + key);
 
@@ -95,7 +116,7 @@ const handle = {
         sdk.buildLegacyBpcPackage();
     },
     beautifySettings: function () {
-        let variant = detectRepoVariant();
+        let variant = detectRepo(true);
         if (variant) {
             let tr = this.modulesettings(variant);
             let tr1 = this.instancesettings(variant);
@@ -172,14 +193,15 @@ const settingsHandler = function (filePath) {
         if (newTranslations.length) {
             doLog('new keys added');
             console.table(newTranslations);
-            console.debug(JSON.stringify(json, undefined, 4));
-            writeFileSync(filePath, JSON.stringify(json, undefined, 4));
-
+            let newData = JSON.stringify(json, undefined, 4)
+            console.debug(newData);
+            writeFile(filePath, newData)
         } else {
             doLog('nothing to do....');
         }
     }
     return newTranslations;
 }
+
 
 module.exports = {handle};
