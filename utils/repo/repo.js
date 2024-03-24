@@ -1,6 +1,7 @@
 const {getArtifactIdFromXml, getValueFromGradleProperties} = require("../release/release");
 const {fileExists} = require("../file/file");
-const {doLog} = require("../log/sourlog");
+const {log} = require('@srcld/sourlog');
+const doLog = log;
 const {FILE_NAME_POM, FILE_NAME_GRADLE} = require("../props");
 
 const getModuleName = function () {

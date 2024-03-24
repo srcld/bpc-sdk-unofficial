@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 const {handle} = require("./cli/methods/map");
-const {doLog} = require("./utils/log/sourlog");
+const {log} = require('@srcld/sourlog');
+const doLog = log;
+
 const {detectRepo} = require("./utils/repo/repo");
 
 const args = process.argv.slice(2);

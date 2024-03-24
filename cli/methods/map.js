@@ -1,6 +1,8 @@
 const sdk = require("../../sdk");
 const {bumpPomXml} = require("../../utils/release/release");
-const {doLog} = require("../../utils/log/sourlog");
+const {log} = require('@srcld/sourlog');
+const doLog = log;
+
 const {fileExists, fileToFormData, writeFile} = require("../../utils/file/file");
 const {readSettingsFile} = require("../../sdk");
 const {getModuleName, detectRepo} = require("../../utils/repo/repo");
