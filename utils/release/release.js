@@ -1,7 +1,7 @@
 const {readFileSync, writeFileSync} = require('fs'),
     shell = require('shelljs'),
     cheerio = require('cheerio');
-const {logLine, log} = require("@muzkat/nextjs-tools/utils/log");
+const {log} = require("@srcld/sourlog");
 const {FILE_NAME_POM, FILE_NAME_GRADLE} = require("../props");
 
 
