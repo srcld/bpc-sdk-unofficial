@@ -12,6 +12,44 @@ const otherArgumentNames = ['modulesettings', 'instancesettings', 'beautifySetti
 
 doLog('BPC SDK - unofficial');
 
+const methodAvailableOrSupported = function (method) {
+    const supportedArgumentsMethods = supportedArgumentNames.concat(otherArgumentNames);
+    const notSupported = supportedArgumentsMethods.indexOf(method) === -1;
+    if (notSupported) {
+        let methodNames = Object.keys(handle)
+        let notAvailable = methodNames.indexOf(method) === -1
+        return !notAvailable;
+    }
+    return !notSupported
+}
+
+const doCallMethod = function (method, host, args) {
+    doLog('METHOD   : ' + method + ' DETECTED');
+    doLog('HOST     : ' + host + ' DETECTED');
+
+    let repoType = detectRepo(true);
+
+    if (!repoType) {
+        doLog('Repo not compliant');
+        return;
+    }
+
+    if (detectRepo() === method) {
+        doLog('nice.')
+        handle[method](args);
+    } else {
+        if (repoType && otherArgumentNames.indexOf(method) !== -1) {
+            doLog(repoType.toUpperCase() + ' found');
+            handle[method](repoType);
+            return;
+        }
+
+        if (method === 'deploy') return handle[method]({host});
+
+        doLog('Method wont run. Sorry. Consult the docs.')
+    }
+}
+
 if (!args.length) {
     doLog("Warning: No arguments");
     process.exit();
@@ -19,37 +57,10 @@ if (!args.length) {
     const method = args[0];
     const host = args[1];
 
-    const supportedArgumentsMethods = supportedArgumentNames.concat(otherArgumentNames);
-
-    if (supportedArgumentsMethods.indexOf(method) === -1) {
-        doLog("Warning: Method no supported");
+    if (!methodAvailableOrSupported(method)) {
+        doLog("Warning: Method no supported or available");
         process.exit();
     }
 
-    if (handle[method]) {
-        doLog('METHOD   : ' + method + ' DETECTED');
-        doLog('HOST     : ' + host + ' DETECTED');
-
-        let repoType = detectRepo(true);
-
-        if (!repoType) {
-            doLog('Repo not compliant');
-            return;
-        }
-
-        if (detectRepo() === method) {
-            doLog('nice.')
-            handle[method](args);
-        } else {
-            if (repoType && otherArgumentNames.indexOf(method) !== -1) {
-                doLog(repoType.toUpperCase() + ' found');
-                handle[method](repoType);
-                return;
-            }
-
-            if (method === 'deploy') return handle[method]({host});
-
-            doLog('Method wont run. Sorry. Consult the docs.')
-        }
-    }
+    doCallMethod(method, host, args)
 }

@@ -25,9 +25,27 @@ const getDeployFilename = function () {
 
 const getHostConfig = function (host) {
     let {systems} = buildEnv();
+    doLog('systems');
+    doLog(JSON.stringify(systems));
     if (systems[host]) {
         return systems[host];
     }
+}
+
+const doDeploy = function (url, key, body){
+    return fetch(url + '', {
+        method: 'POST',
+        headers: {"x-apikey": key},
+        body,
+    }).then((r) => {
+        doLog('STATUS       : ' + r.status);
+        doLog('STATUSTEXT   : ' + r.statusText);
+        return r.json();
+    }).then((json) => {
+        return console.log(json);
+    }).catch((e) => {
+        console.debug(e);
+    });
 }
 
 const handle = {
@@ -54,6 +72,18 @@ const handle = {
     xml: function (args) {
         bumpPomXml();
     },
+    cp : function (params){
+      doLog('alt method called')
+      this.deployFromFiles(params)
+    },
+    deployFromFiles: function (params = {}){
+        let {host} = params;
+        let cfg = getHostConfig(host);
+        if (!cfg) {
+            doLog('SYSTEM ' + host + ' NOT FOUND. STOP.');
+            return;
+        }
+    },
     deploy: async function (params = {}) {
         let {host} = params;
         let cfg = getHostConfig(host);
@@ -74,20 +104,7 @@ const handle = {
 
                 doLog('URL       : ' + url);
                 doLog('KEY       : ' + key);
-
-                fetch(url + '', {
-                    method: 'POST',
-                    headers: {"x-apikey": key},
-                    body,
-                }).then((r) => {
-                    doLog('STATUS       : ' + r.status);
-                    doLog('STATUSTEXT   : ' + r.statusText);
-                    return r.json();
-                }).then((json) => {
-                    return console.log(json);
-                }).catch((e) => {
-                    console.debug(e);
-                });
+                doDeploy(url, key, body);
             } else if (feOrBe === 'be') {
                 doLog('BACKEND MODULE');
                 let {url, key} = cfg;
@@ -97,20 +114,7 @@ const handle = {
 
                 doLog('URL       : ' + url);
                 doLog('KEY       : ' + key);
-
-                fetch(url + '', {
-                    method: 'POST',
-                    headers: {"x-apikey": key},
-                    body,
-                }).then((r) => {
-                    doLog('STATUS       : ' + r.status);
-                    doLog('STATUSTEXT   : ' + r.statusText);
-                    return r.json();
-                }).then((json) => {
-                    return console.log(json);
-                }).catch((e) => {
-                    console.debug(e);
-                });
+                doDeploy(url, key, body);
             }
         }
     },
