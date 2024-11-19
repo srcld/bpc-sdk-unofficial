@@ -20,7 +20,7 @@ const read = function (path, encoding = 'utf8') {
     return readFileSync(path, encoding);
 }
 
-const getArtifactIdFromXml = function (){
+const getArtifactIdFromXml = function () {
     let data = read(FILE_NAME_POM)
 
     let pomCheerio = cheerio.load(data, {
@@ -29,7 +29,7 @@ const getArtifactIdFromXml = function (){
     return pomCheerio('project > artifactId').text();
 }
 
-const getValueFromGradleProperties = function (key = 'packageName', file = propertiesFile){
+const getValueFromGradleProperties = function (key = 'packageName', file = propertiesFile) {
     const arrayData = readGradlePropertiesAsArray(file);
     let match = arrayData.filter((obj) => obj.key === key);
     return match.length ? match[0].value : undefined;
@@ -201,7 +201,7 @@ const createTag = function (tagMessage = '') {
         return;
     }
 
-    if (runError(exec('git tag "' + tagMessage + '"'))) {
+    if (runError(exec('git tag -a "' + tagMessage + '" -m "' + tagMessage + '"'))) {
         consoleShell('Error: Git tagging failed');
         return false
     }
