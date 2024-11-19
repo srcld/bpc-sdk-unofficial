@@ -14,7 +14,7 @@ const nExtJs = require('@muzkat/nextjs-tools'),
 const {logLine, log} = require("@srcld/sourlog");
 const {readJson} = require("./utils/release/release");
 const {fileExists} = require("./utils/file/file");
-const {getDirectories} = require("@muzkat/nextjs-tools/utils/file");
+const {getDirectories} = require("@muzkat/nextjs-tools/src/utils/file");
 
 /**
  * get nExtJs-tools builder for your module (Ext Js Package)
@@ -51,13 +51,14 @@ const buildWar = (moduleName = '', sources = [], applicationName = '', version, 
  * @returns {Promise<*>}
  */
 const buildPackage = (moduleName = '', applicationName = '', settings = {}, version, buildInfo) => {
-    return getBPCBuilder(moduleName)
-        .build()
+    const builder = getBPCBuilder(moduleName);
+    return builder.build()
         .then((buildObject) => {
             let resourcesBasePath = prepareWorkspace(moduleName);
             handleSettings(settings, resourcesBasePath + '/');
             return getSourcesArray(moduleName);
         }).then((sources) => {
+            version = version || builder.getPackageVersion();
             return buildWar(moduleName, sources, applicationName, version, buildInfo)
         })
 }
